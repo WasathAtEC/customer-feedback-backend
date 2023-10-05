@@ -1,19 +1,15 @@
 import { app } from "./config/express";
 import { connect } from "./config/db";
+import dotenv from "dotenv";
 
-const PORT = 8000;
-const HOST = "localhost";
+dotenv.config();
 
-connect()
-  .then(() => {
-    try {
-      app.listen(PORT, HOST, () => {
-        console.log(`Backend is running on http://${HOST}:${PORT}`);
-      });
-    } catch (error) {
-      console.error("Error while starting up server", error);
-    }
-  })
-  .catch((error) => {
-    console.error("Error while connecting to database", error);
-  });
+const HOST = process.env.HOST!;
+const PORT = parseInt(process.env.PORT!);
+
+connect();
+
+app.listen(PORT, HOST, () => {
+  console.log(`Backend is running on http://${HOST}:${PORT}`);
+});
+
