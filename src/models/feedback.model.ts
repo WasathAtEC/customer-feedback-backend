@@ -1,9 +1,11 @@
-import { IssueCategories } from "./../enums/issueCategories";
+import { IssueCategories } from "../enums/issueCategories";
+import { company } from "../enums/company";
 import mongoose from "mongoose";
 
 const feedbackScheema = new mongoose.Schema({
   company: {
     type: String,
+    enum: Object.values(company),
     required: [true, "Company is required!"],
   },
 
@@ -40,7 +42,7 @@ const feedbackScheema = new mongoose.Schema({
   imageUrl: {
     type: String,
   },
-  
+
   ticket: {
     type: String,
     required: [true, "Ticket generation failed!"],
