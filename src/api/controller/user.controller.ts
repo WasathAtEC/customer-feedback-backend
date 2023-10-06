@@ -1,0 +1,96 @@
+import { Request, Response } from "express";
+import { IPortalUserInputDTO, ILoginData } from "types/portalUser";
+import userModel from "../../models/user.model";
+import bcrypt from "bcrypt";
+import { generateToken } from "../../utils/generateToken";
+
+// test route
+export const test = (_req: Request, res: Response) => {
+  res.status(200).json({
+    hello: "world",
+  });
+};
+
+// register user
+export const registerUser = async (req: Request, res: Response) => {
+  try {
+    const userData: IPortalUserInputDTO = req.body;
+
+    if (
+      !userData.email ||
+      !userData.firstName ||
+      !userData.lastName ||
+      !userData.password ||
+      !userData.role
+    ) {
+      return res.status(400).json({ message: "Please fill required fields!" });
+    }
+
+    const existingEmail = await userModel.findOne({ email: userData.email });
+
+    if (existingEmail) {
+      return res.status(400).json({ message: "Email already exists!" });
+    }
+
+    const hashedPassword = await bcrypt.hash(userData.password, 10);
+
+    const user = new userModel({
+      ...userData,
+      password: hashedPassword,
+    });
+
+    const savedUser = await user.save();
+    res
+      .status(201)
+      .json({ message: "User created successfully!", user: savedUser });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+  return 1;
+};
+
+// login user
+export const loginUser = async (req: Request, res: Response) => {
+  try {
+    const loginData: ILoginData = req.body;
+
+    const checkEmail = await userModel.findOne({ email: loginData.email });
+
+    if (!checkEmail) {
+      return res.status(400).json({ message: "Email does not exist!" });
+    }
+
+    const role = checkEmail.role;
+    const company = checkEmail.company;
+
+    console.log(role);
+    console.log(company);
+
+    const checkPassword = await bcrypt.compare(
+      loginData.password,
+      checkEmail.password
+    );
+
+    if (!checkPassword) {
+      return res.status(400).json({ message: "Invalid password!" });
+    }
+
+    const token = generateToken({
+      email: checkEmail.email,
+      userId: checkEmail._id.toString(),
+      role: checkEmail.role,
+      company: checkEmail.company,
+    })
+
+    return res.status(200).json({
+      message: "Login successful!",
+      token: token,
+      expiresIn: 3600,
+      role: role,
+      company: company,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+  return 1;
+};
