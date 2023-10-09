@@ -1,7 +1,6 @@
 export interface ITransformedFeedback extends IFeedbackInputDTO {
   _id: string;
-  createdAt: Date;
-  updatedAt: Date;
+  __v: number;
 }
 
 export interface IFeedbackInputDTO {
