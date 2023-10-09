@@ -9,7 +9,7 @@ export const verifyUser = async (
   try {
     const { email } = req.method == "GET" ? req.query : req.body;
 
-    let exits = await UserModel.findOne({ email });
+    let exits = await Promise.resolve(UserModel.findOne({ email }));
     if (!exits) return res.status(404).send({ error: "Can't find the User" });
     next();
   } catch (error) {
