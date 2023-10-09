@@ -105,7 +105,7 @@ export const replyFeedback = async (req: Request, res: Response) => {
         .status(401)
         .json({ message: "You are not authorized to delete this feedback!" });
     }
-    
+
     if (!feedback) {
       return res.status(404).json({ message: "Feedback not found!" });
     }
@@ -116,7 +116,7 @@ export const replyFeedback = async (req: Request, res: Response) => {
       lastName: "",
       message: message,
       subject: "Feedback Reply",
-      instructions: "Click the button below to check your feedback status",
+      instructions: `Your feedback is about \ ${feedback.subject}`,
       btnText: "Check your feedback status",
       link: "https://www.elysiancrest.com",
     })
