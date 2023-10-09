@@ -3,6 +3,7 @@ import { IPortalUserInputDTO, ILoginData } from "types/portalUser";
 import userModel from "../../models/user.model";
 import bcrypt from "bcrypt";
 import { generateToken } from "../../utils/generateToken";
+import { sendReplyEmail } from "../../utils/mailer";
 
 // test route
 export const test = (_req: Request, res: Response) => {
@@ -26,7 +27,9 @@ export const registerUser = async (req: Request, res: Response) => {
       return res.status(400).json({ message: "Please fill required fields!" });
     }
 
-    const existingEmail = await userModel.findOne({ email: userData.email });
+    const existingEmail = await Promise.resolve(
+      userModel.findOne({ email: userData.email })
+    );
 
     if (existingEmail) {
       return res.status(400).json({ message: "Email already exists!" });
@@ -40,6 +43,19 @@ export const registerUser = async (req: Request, res: Response) => {
     });
 
     const savedUser = await user.save();
+
+    await sendReplyEmail({
+      email: savedUser.email,
+      firstName: savedUser.firstName,
+      lastName: savedUser.lastName,
+      message:
+        "Welcome to Elysian Crest Customer Feedback Portal. We are excited to have you on board!",
+      subject: "Elysian Crest Customer Feedback Portal",
+      instructions:
+        "Click the button below to login to your account and check your feedback status.",
+      btnText: "Login to your account",
+    });
+
     res
       .status(201)
       .json({ message: "User created successfully!", user: savedUser });
@@ -54,7 +70,9 @@ export const loginUser = async (req: Request, res: Response) => {
   try {
     const loginData: ILoginData = req.body;
 
-    const checkEmail = await userModel.findOne({ email: loginData.email });
+    const checkEmail = await Promise.resolve(
+      userModel.findOne({ email: loginData.email })
+    );
 
     if (!checkEmail) {
       return res.status(400).json({ message: "Email does not exist!" });
@@ -63,12 +81,8 @@ export const loginUser = async (req: Request, res: Response) => {
     const role = checkEmail.role;
     const company = checkEmail.company;
 
-    console.log(role);
-    console.log(company);
-
-    const checkPassword = await bcrypt.compare(
-      loginData.password,
-      checkEmail.password
+    const checkPassword = await Promise.resolve(
+      bcrypt.compare(loginData.password, checkEmail.password)
     );
 
     if (!checkPassword) {
@@ -80,7 +94,7 @@ export const loginUser = async (req: Request, res: Response) => {
       userId: checkEmail._id.toString(),
       role: checkEmail.role,
       company: checkEmail.company,
-    })
+    });
 
     return res.status(200).json({
       message: "Login successful!",
