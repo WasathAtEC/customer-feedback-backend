@@ -1,10 +1,8 @@
 import { Request, Response, NextFunction } from "express";
-import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
+import { decodedPayload } from "../../utils/jwtDecoder";
 
 dotenv.config();
-
-const secret = process.env.JWT_SECRET!;
 
 declare global {
   namespace Express {
@@ -24,7 +22,7 @@ export const Auth = (req: Request, res: Response, next: NextFunction) => {
         .json({ message: "Authorization Failed: No token provided" });
     }
 
-    const decodedToken = jwt.verify(token, secret) as { [key: string]: any };
+    const decodedToken = decodedPayload(token);
     req.user = decodedToken;
 
     next();
