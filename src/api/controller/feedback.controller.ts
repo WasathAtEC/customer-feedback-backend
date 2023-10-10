@@ -1,8 +1,9 @@
 import { IFeedbackInputDTO } from "types/feedback";
 import Feedback from "../../models/feedback.model";
+import { sendReplyEmail } from "../../utils/mailer";
+import { deleteBlob } from "../../utils/deleteBlob";
 import { Request, Response } from "express";
 import dotenv from "dotenv";
-import { sendReplyEmail } from "../../utils/mailer";
 
 dotenv.config();
 
@@ -108,6 +109,13 @@ export const replyFeedback = async (req: Request, res: Response) => {
 
     if (!feedback) {
       return res.status(404).json({ message: "Feedback not found!" });
+    }
+
+    const blobName = feedback?.imageUrl?.split("/").pop();
+    console.log(blobName);
+
+    if (blobName) {
+      deleteBlob(blobName);
     }
 
     await sendReplyEmail({
