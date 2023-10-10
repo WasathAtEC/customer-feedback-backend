@@ -16,7 +16,8 @@ export const generateToken = (options: IJwtToken) => {
     },
     secret,
     {
-        expiresIn: "24h",
+      // if your are testing add expiresIn: "1m"
+      expiresIn: "24h",
     }
   );
 };

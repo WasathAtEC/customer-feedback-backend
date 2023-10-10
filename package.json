@@ -6,7 +6,8 @@
   "author": "WasathAtEC <wasath.t@elysiancrest.com>",
   "license": "MIT",
   "scripts": {
-    "start": "nodemon"
+    "dev": "nodemon",
+    "start": "ts-node src/index.ts"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.0",
