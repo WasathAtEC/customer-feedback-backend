@@ -207,7 +207,7 @@ export const replyFeedback = async (req: Request, res: Response) => {
       lastName: "",
       message: message,
       subject: "Feedback Reply",
-      instructions: `Your feedback is about \ ${feedback.subject}`,
+      instructions: `Your feedback is about  ${feedback.subject}`,
       btnText: "Check your feedback status",
       link: "https://www.elysiancrest.com",
     })
