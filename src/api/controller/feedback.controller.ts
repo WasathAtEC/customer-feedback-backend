@@ -90,6 +90,89 @@ export const getFilteredFeedbacksByIssueCategory = async (
   }
 };
 
+// get filtered feedbacks by company name if user is EC category and by company name if user is not EC category
+export const getFilteredFeedbacksByCompany = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const { company } = req.user;
+    const { companyName } = req.params;
+
+    if (company === "EC") {
+      const feedbacks = await Promise.resolve(
+        Feedback.find({ company: companyName })
+      );
+      return res.status(200).json({ feedbacks });
+    }
+
+    return res.status(401).json({
+      message: "You are not authorized to access this data!",
+    });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+// get filterd feedbaks by company name and issue type if user is EC category and by company name if user is not EC category
+export const getFilteredFeedbacksByCompanyAndIssueCategory = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const { company } = req.user;
+    const { companyName, issueCategory } = req.params;
+
+    if (company !== "EC") {
+      return res.status(401).json({
+        message: "You are not authorized to access this data!",
+      });
+    }
+
+    if (issueCategory === ":issueCategory") {
+      const feedbacks = await Promise.resolve(
+        Feedback.find({ company: companyName })
+      );
+      return res.status(200).json({ feedbacks });
+    }
+
+    const feedbacks = await Promise.resolve(
+      Feedback.find({ company: companyName, issueCategory: issueCategory })
+    );
+    return res.status(200).json({ feedbacks });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+// get post by id and cant be accessed by other companies
+export const getFeedbackById = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { company } = req.user;
+
+    const feedback = await Promise.resolve(Feedback.findById(id));
+
+    if (!feedback) {
+      return res.status(404).json({ message: "Feedback not found!" });
+    }
+
+    if (company === "EC") {
+      return res.status(200).json({ feedback });
+    }
+
+    if (feedback?.company !== company) {
+      return res
+        .status(401)
+        .json({ message: "You are not authorized to access this data!" });
+    }
+
+    return res.status(200).json({ feedback });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
 // select the feedback by id and send a message to the user and after that delete the feedback from the database
 export const replyFeedback = async (req: Request, res: Response) => {
   try {
