@@ -108,3 +108,19 @@ export const loginUser = async (req: Request, res: Response) => {
   }
   return 1;
 };
+
+// authenticate the user
+export const authenticateUser = async (req: Request, res: Response) => {
+  try {
+    const { email, role, company } = req.user;
+
+    return res.status(200).json({
+      message: "Authentication successful!",
+      email: email,
+      role: role,
+      company: company,
+    });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+}

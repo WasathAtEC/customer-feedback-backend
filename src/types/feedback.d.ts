@@ -4,6 +4,8 @@ export interface ITransformedFeedback extends IFeedbackInputDTO {
 }
 
 export interface IFeedbackInputDTO {
+  time: string;
+  date: string;
   company: string;
   issueCategory: string;
   name: string;
@@ -12,4 +14,5 @@ export interface IFeedbackInputDTO {
   message: string;
   imageUrl: string;
   ticket: string;
+  isFixed: boolean;
 }
