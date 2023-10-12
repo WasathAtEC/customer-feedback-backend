@@ -75,6 +75,10 @@ export const getAllFeedbacks = async (req: Request, res: Response) => {
     }
 
     if (isFixed !== undefined) {
+      query.isFixed = isFixed === "false"; 
+    }
+
+    if (isFixed !== undefined) {
       query.isFixed = isFixed === "true"; 
     }
 
@@ -116,8 +120,12 @@ export const getFilteredFeedbacksByCompanyAndIssueCategory = async (
     }
 
     if (isFixed !== undefined) {
-      query.isFixed = isFixed === "true"; // Assuming isFixed is passed as a string
+      query.isFixed = isFixed === "false"; // Assuming isFixed is passed as a string
     }
+
+    if (isFixed !== undefined) {
+      query.isFixed = isFixed === "true"; // Assuming isFixed is passed as a string
+    } 
 
     const feedbacks = await Promise.resolve(Feedback.find(query));
 
@@ -165,7 +173,6 @@ export const replyFeedback = async (req: Request, res: Response) => {
 
     const feedback = await Promise.resolve(Feedback.findById(id));
 
-    // user can delete only his company feedback but if the user is EC he can delete all feedbacks
     if (company !== "EC") {
       if (feedback?.company !== company) {
         return res
@@ -177,13 +184,6 @@ export const replyFeedback = async (req: Request, res: Response) => {
     if (!feedback) {
       return res.status(404).json({ message: "Feedback not found!" });
     }
-
-    // const blobName = feedback?.imageUrl?.split("/").pop();
-    // console.log(blobName);
-
-    // if (blobName) {
-    //   deleteBlob(blobName);
-    // }
 
     await sendReplyEmail({
       email: feedback.email,
