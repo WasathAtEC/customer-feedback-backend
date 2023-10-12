@@ -3,6 +3,16 @@ import { company } from "../enums/company";
 import mongoose from "mongoose";
 
 const feedbackScheema = new mongoose.Schema({
+  time: {
+    type: String,
+    required: [true, "Time is required!"],
+  },
+
+  date: {
+    type: String,
+    required: [true, "Date is required!"],
+  },
+
   company: {
     type: String,
     enum: Object.values(company),
@@ -47,6 +57,11 @@ const feedbackScheema = new mongoose.Schema({
     type: String,
     required: [true, "Ticket generation failed!"],
   },
+
+  isFixed: {
+    type: Boolean,
+    default: false,
+  }
 });
 
 export default mongoose.model("Feedback", feedbackScheema);
