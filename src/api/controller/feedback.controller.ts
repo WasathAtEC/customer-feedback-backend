@@ -1,7 +1,6 @@
 import { IFeedbackInputDTO } from "types/feedback";
 import Feedback from "../../models/feedback.model";
 import { sendReplyEmail } from "../../utils/mailer";
-import { deleteBlob } from "../../utils/deleteBlob";
 import { Request, Response } from "express";
 import dotenv from "dotenv";
 
@@ -34,6 +33,9 @@ export const createFeedback = async (req: Request, res: Response) => {
       feedbackResponse.imageUrl = `${blobUrl}${blobName}`;
     }
 
+    feedbackResponse.time = new Date().toLocaleTimeString();
+    feedbackResponse.date = new Date().toLocaleDateString();
+
     const feedback = new Feedback(feedbackResponse);
     await feedback.save();
     console.log(feedbackResponse);
@@ -49,66 +51,35 @@ export const createFeedback = async (req: Request, res: Response) => {
 export const getAllFeedbacks = async (req: Request, res: Response) => {
   try {
     const { company } = req.user;
+    const { issueCategory, date, isFixed } = req.query;
 
     if (company == "EC") {
-      const feedbacks = await Promise.resolve(Feedback.find());
-      return res.status(200).json({ feedbacks });
+      return res.status(401).json({
+        message: "You are not authorized to access this data!",
+      });
     }
 
-    const feedbacks = await Promise.resolve(
-      Feedback.find({ company: company })
-    );
+    const query: {
+      company: string;
+      issueCategory?: string;
+      date?: string;
+      isFixed?: boolean;
+    } = { company: (company as string) || "" };
+
+    if (issueCategory) {
+      query.issueCategory = issueCategory as string;
+    }
+
+    if (date) {
+      query.date = date as string;
+    }
+
+    if (isFixed !== undefined) {
+      query.isFixed = isFixed === "true"; 
+    }
+
+    const feedbacks = await Promise.resolve(Feedback.find(query));
     return res.status(200).json({ feedbacks });
-  } catch (error) {
-    return res.status(500).json({ message: error.message });
-  }
-};
-
-// get filtered feedbacks by company name according to user's company filter by issue type
-export const getFilteredFeedbacksByIssueCategory = async (
-  req: Request,
-  res: Response
-) => {
-  try {
-    const { company } = req.user;
-    const { issueCategory } = req.params;
-
-    // if company is EC show all feedbacks filtered by issue type
-    if (company === "EC") {
-      const feedbacks = await Promise.resolve(
-        Feedback.find({ issueCategory: issueCategory })
-      );
-      return res.status(200).json({ feedbacks });
-    }
-
-    const feedbacks = await Promise.resolve(
-      Feedback.find({ company: company, issueCategory: issueCategory })
-    );
-    return res.status(200).json({ feedbacks });
-  } catch (error) {
-    return res.status(500).json({ message: error.message });
-  }
-};
-
-// get filtered feedbacks by company name if user is EC category and by company name if user is not EC category
-export const getFilteredFeedbacksByCompany = async (
-  req: Request,
-  res: Response
-) => {
-  try {
-    const { company } = req.user;
-    const { companyName } = req.params;
-
-    if (company === "EC") {
-      const feedbacks = await Promise.resolve(
-        Feedback.find({ company: companyName })
-      );
-      return res.status(200).json({ feedbacks });
-    }
-
-    return res.status(401).json({
-      message: "You are not authorized to access this data!",
-    });
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }
@@ -121,7 +92,7 @@ export const getFilteredFeedbacksByCompanyAndIssueCategory = async (
 ) => {
   try {
     const { company } = req.user;
-    const { companyName, issueCategory } = req.params;
+    const { companyName, issueCategory, date, isFixed } = req.query;
 
     if (company !== "EC") {
       return res.status(401).json({
@@ -129,16 +100,27 @@ export const getFilteredFeedbacksByCompanyAndIssueCategory = async (
       });
     }
 
-    if (issueCategory === ":issueCategory") {
-      const feedbacks = await Promise.resolve(
-        Feedback.find({ company: companyName })
-      );
-      return res.status(200).json({ feedbacks });
+    const query: {
+      company: string;
+      issueCategory?: string;
+      date?: string;
+      isFixed?: boolean;
+    } = { company: (companyName as string) || "" };
+
+    if (issueCategory) {
+      query.issueCategory = issueCategory as string;
     }
 
-    const feedbacks = await Promise.resolve(
-      Feedback.find({ company: companyName, issueCategory: issueCategory })
-    );
+    if (date) {
+      query.date = date as string;
+    }
+
+    if (isFixed !== undefined) {
+      query.isFixed = isFixed === "true"; // Assuming isFixed is passed as a string
+    }
+
+    const feedbacks = await Promise.resolve(Feedback.find(query));
+
     return res.status(200).json({ feedbacks });
   } catch (error) {
     return res.status(500).json({ message: error.message });
@@ -183,23 +165,25 @@ export const replyFeedback = async (req: Request, res: Response) => {
 
     const feedback = await Promise.resolve(Feedback.findById(id));
 
-    // user can delete only his company feedback
-    if (feedback?.company !== company) {
-      return res
-        .status(401)
-        .json({ message: "You are not authorized to delete this feedback!" });
+    // user can delete only his company feedback but if the user is EC he can delete all feedbacks
+    if (company !== "EC") {
+      if (feedback?.company !== company) {
+        return res
+          .status(401)
+          .json({ message: "You are not authorized to delete this feedback!" });
+      }
     }
 
     if (!feedback) {
       return res.status(404).json({ message: "Feedback not found!" });
     }
 
-    const blobName = feedback?.imageUrl?.split("/").pop();
-    console.log(blobName);
+    // const blobName = feedback?.imageUrl?.split("/").pop();
+    // console.log(blobName);
 
-    if (blobName) {
-      deleteBlob(blobName);
-    }
+    // if (blobName) {
+    //   deleteBlob(blobName);
+    // }
 
     await sendReplyEmail({
       email: feedback.email,
@@ -218,7 +202,9 @@ export const replyFeedback = async (req: Request, res: Response) => {
         res.status(500).json({ message: error.message });
       });
 
-    return await Promise.resolve(Feedback.findByIdAndDelete(id));
+    return await Promise.resolve(
+      Feedback.findByIdAndUpdate(id, { isFixed: true })
+    );
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }
