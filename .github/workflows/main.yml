@@ -13,10 +13,6 @@ jobs:
           uses: azure/login@v1
           with:
             creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-        - name: 'Create .env file from secret'
-          run: |
-            echo "${{ secrets.ENV_FILE }}" > .env
         
         - name: 'Build and push image'
           uses: azure/docker-login@v1
