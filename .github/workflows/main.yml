@@ -1,44 +1,25 @@
-name: Build and Push to Azure ACR
-
-on:
-  push:
-    branches: ["main"]
+on: [push]
+name: Linux_Container_Workflow
 
 jobs:
-  build-and-push:
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
-
-    - name: Login to Azure
-      uses: azure/login@v1
-      with:
-        login-server: ${{ secrets.REGISTRY_SERVER }}
-        username: ${{ secrets.REGISTRY_USERNAME }}
-        password: ${{ secrets.REGISTRY_PASSWORD }}
-        enable-AzPSSession: false
-        environment: azurecloud
-        allow-no-subscriptions: false
-        audience: api://AzureADTokenExchange
-
-    - name: Set up Docker
-      uses: docker/setup-qemu-action@v1
-
-    - name: Build Docker image
-      run: |
-        docker build -t ${{ secrets.REGISTRY_SERVER }}/eccustomerapi .
-      working-directory: ./Dockerfile
-
-    - name: Login to ACR
-      run: docker login ${{ secrets.REGISTRY_SERVER }} -u ${{ secrets.REGISTRY_USERNAME }} -p ${{ secrets.REGISTRY_PASSWORD }}
-
-    - name: Push Docker image to ACR
-      run: docker push ${{ secrets.REGISTRY_SERVER }}/eccustomerapi
-
-    - name: Logout of ACR
-      run: docker logout ${{ secrets.REGISTRY_SERVER }}
-
-    - name: Logout of Azure
-      run: az logout
+    build-and-deploy:
+        runs-on: ubuntu-latest
+        steps:
+        # checkout the repo
+        - name: 'Checkout GitHub Action'
+          uses: actions/checkout@main
+          
+        - name: 'Login via Azure CLI'
+          uses: azure/login@v1
+          with:
+            creds: ${{ secrets.AZURE_CREDENTIALS }}
+        
+        - name: 'Build and push image'
+          uses: azure/docker-login@v1
+          with:
+            login-server: ${{ secrets.REGISTRY_LOGIN_SERVER }}
+            username: ${{ secrets.REGISTRY_USERNAME }}
+            password: ${{ secrets.REGISTRY_PASSWORD }}
+        - run: |
+            docker build . -t ${{ secrets.REGISTRY_SERVER }}/sampleapp:${{ github.sha }}
+            docker push ${{ secrets.REGISTRY_SERVER }}/sampleapp:${{ github.sha }}
