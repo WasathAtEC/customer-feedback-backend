@@ -21,5 +21,5 @@ jobs:
             username: ${{ secrets.REGISTRY_USERNAME }}
             password: ${{ secrets.REGISTRY_PASSWORD }}
         - run: |
-            docker build . -t ${{ secrets.REGISTRY_SERVER }}/sampleapp:${{ github.sha }}
-            docker push ${{ secrets.REGISTRY_SERVER }}/sampleapp:${{ github.sha }}
+            docker build . -t ${{ secrets.REGISTRY_SERVER }}/eccustomerfeedbackapi:latest
+            docker push ${{ secrets.REGISTRY_SERVER }}/eccustomerfeedbackapi:latest
