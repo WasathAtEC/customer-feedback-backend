@@ -1,7 +1,7 @@
 {
   "name": "customer-feedback-backend",
   "version": "1.0.0",
-  "main": "./src/index.ts",
+  "main": "src/index.ts",
   "repository": "https://github.com/WasathAtEC/customer-feedback-backend.git",
   "author": "WasathAtEC <wasath.t@elysiancrest.com>",
   "license": "MIT",
