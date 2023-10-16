@@ -30,4 +30,5 @@ bash docker.sh run
 <br>
 
 ### Read the API Documentation for API routes
+Production API - http://ec-api.czduhsdfatdud7bz.eastus.azurecontainer.io/api/v1/user/test
 API Documentation - https://documenter.getpostman.com/view/26690466/2s9YJhwzJ7
