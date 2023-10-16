@@ -15,9 +15,7 @@ jobs:
     - name: Login to Azure
       uses: azure/login@v1
       with:
-        login-server: ${{ secrets.REGISTRY_SERVER }}
-        username: ${{ secrets.REGISTRY_USERNAME }}
-        password: ${{ secrets.REGISTRY_PASSWORD }}
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
 
     - name: Set up Docker
       uses: docker/setup-qemu-action@v1
