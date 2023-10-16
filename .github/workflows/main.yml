@@ -16,8 +16,8 @@ jobs:
       uses: azure/login@v1
       with:
         login-server: ${{ secrets.REGISTRY_SERVER }}
-        username: ${{ secret.REGISTRY_USERNAME }}
-        password: ${{ secret.REGISTRY_PASSWORD }}
+        username: ${{ secrets.REGISTRY_USERNAME }}
+        password: ${{ secrets.REGISTRY_PASSWORD }}
 
     - name: Set up Docker
       uses: docker/setup-qemu-action@v1
@@ -28,7 +28,7 @@ jobs:
       working-directory: ./Dockerfile
 
     - name: Login to ACR
-      run: docker login ${{ secrets.REGISTRY_SERVER }} -u ${{ secret.REGISTRY_USERNAME }} -p ${{ secret.REGISTRY_PASSWORD }}
+      run: docker login ${{ secrets.REGISTRY_SERVER }} -u ${{ secrets.REGISTRY_USERNAME }} -p ${{ secrets.REGISTRY_PASSWORD }}
 
     - name: Push Docker image to ACR
       run: docker push ${{ secrets.REGISTRY_SERVER }}/eccustomerapi
