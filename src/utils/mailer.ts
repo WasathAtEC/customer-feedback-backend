@@ -29,11 +29,10 @@ export const sendReplyEmail = async ({
   email,
   firstName,
   lastName,
+  issue,
   message,
   subject,
   instructions,
-  btnText,
-  link,
 }: IEmail) => {
   try {
     instructions = instructions || "";
@@ -41,17 +40,8 @@ export const sendReplyEmail = async ({
     const response = {
       body: {
         name: firstName + " " + lastName,
-        intro: message,
-        action: {
-          instructions: instructions,
-          button: {
-            color: "#22BC66",
-            text: btnText || "Check your feedback status",
-            link: link || "https://www.elysiancrest.com",
-          },
-        },
-        outro:
-          "Need help, or have questions? Just reply to this email, we'd love to help.",
+        intro: `<strong>Issue:</strong> <br>${issue}`,
+        outro: `<strong>Related Response: </strong> <br>${message}`,
       },
     };
 

@@ -3,7 +3,6 @@ import { IPortalUserInputDTO, ILoginData } from "types/portalUser";
 import userModel from "../../models/user.model";
 import bcrypt from "bcrypt";
 import { generateToken } from "../../utils/generateToken";
-import { sendReplyEmail } from "../../utils/mailer";
 
 // test route
 export const test = (_req: Request, res: Response) => {
@@ -43,18 +42,6 @@ export const registerUser = async (req: Request, res: Response) => {
     });
 
     const savedUser = await user.save();
-
-    await sendReplyEmail({
-      email: savedUser.email,
-      firstName: savedUser.firstName,
-      lastName: savedUser.lastName,
-      message:
-        "Welcome to Elysian Crest Customer Feedback Portal. We are excited to have you on board!",
-      subject: "Elysian Crest Customer Feedback Portal",
-      instructions:
-        "Click the button below to login to your account and check your feedback status.",
-      btnText: "Login to your account",
-    });
 
     res
       .status(201)
